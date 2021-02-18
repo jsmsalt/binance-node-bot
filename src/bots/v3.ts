@@ -63,6 +63,8 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
     let lastOpenTime: number = 0;
     let candles: CandleChartResult[] = [];
 
+    Log('Worker iniciado...');
+
     setInterval(async () => {
         try {
             /*
