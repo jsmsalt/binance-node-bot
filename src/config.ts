@@ -16,7 +16,7 @@ export const config: IConfig = {
     candlesInterval: '15m',
     candlesLimit: 100,
     assets: [
-        { asset: 'DOGE', base: 'USDT', amount: 25 },
+        { asset: 'DOGE', base: 'USDT', amount: 15 },
         { asset: 'VET', base: 'USDT', amount: 25 },
         { asset: 'DOT', base: 'USDT', amount: 25 },
         { asset: 'UMA', base: 'USDT', amount: 25 },
