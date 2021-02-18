@@ -64,3 +64,5 @@ if (config.telegramToken) {
 
     telegram.start();
 }
+
+setInterval(() => console.log(`[${new Date().toLocaleString()}][MAIN] ----------------------`), 60000);
