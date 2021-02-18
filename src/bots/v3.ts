@@ -188,6 +188,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             }
         } catch (error) {
             Log(`Error inesperado`, true);
+            console.log(JSON.stringify(error));
             return;
         }
     }, config.workersInterval);
