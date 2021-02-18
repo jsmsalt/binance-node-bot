@@ -1,5 +1,5 @@
 import { PSAR, RSI } from 'technicalindicators';
-import { TrendAnalytics } from 'helpers/utils';
+import { TrendAnalytics } from './utils';
 
 export const GetPsarSignal = (low: number[], high: number[]): 'sell' | 'buy' | 'hold' => {
     let step = 0.02;

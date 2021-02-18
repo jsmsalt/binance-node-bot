@@ -1,10 +1,10 @@
 import Binance, { AssetBalance, CandleChartInterval, CandleChartResult } from 'binance-api-node';
 import { exit } from 'process';
 import { parentPort, workerData } from 'worker_threads';
-import { CandleToObjectArray, GetAvgBollingerBands, RoundStep } from 'helpers/utils';
-import { GetPsarSignal, GetRsiSignal } from 'helpers/signals';
-import { config } from 'config';
-import { IAsset } from 'types';
+import { CandleToObjectArray, GetAvgBollingerBands, RoundStep } from './helpers/utils';
+import { GetPsarSignal, GetRsiSignal } from './helpers/signals';
+import { config } from './config';
+import { IAsset } from './types';
 
 let { asset, base, amount } = workerData as IAsset;
 

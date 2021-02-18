@@ -2,7 +2,7 @@ import path from 'path';
 import { config } from './config';
 import TeleBot from 'telebot';
 import { Worker } from 'worker_threads';
-import { IAsset } from 'types';
+import { IAsset } from './types';
 
 let telegram = null;
 let telegramChatId = 0;
@@ -15,6 +15,7 @@ let workers = new Map<string, Worker>();
 const onAction = (type: 'error' | 'exit' | 'message', message: any) => {
     switch (type) {
         case 'exit':
+            if (workers.has(message.asset)) workers.delete(message.asset);
             sendTelegramMessage(`Se detuvo el worker de ${message?.asset}`);
             break;
         case 'message':
@@ -28,9 +29,9 @@ const onAction = (type: 'error' | 'exit' | 'message', message: any) => {
 
 const addCoin = (assetData: IAsset) => {
     let asset = assetData.asset.toUpperCase();
-    const worker = new Worker(path.join(__dirname, 'bots', 'v3.js'), { workerData: assetData });
+    const worker = new Worker(path.join(__dirname, 'worker.js'), { workerData: assetData });
     worker.on('message', msg => onAction('message', msg));
-    worker.on('error', _err => onAction('error', { asset }));
+    worker.on('error', error => onAction('error', { error, asset }));
     worker.on('exit', exitCode => onAction('exit', { code: exitCode, asset }));
     workers.set(asset, worker);
 };
@@ -47,6 +48,8 @@ const sendTelegramMessage = (msg: string) => {
     if (telegram && telegramChatId) {
         telegram.sendMessage(telegramChatId, msg);
     }
+
+    console.log(`[${new Date().toLocaleString()}] ${msg}`);
 };
 
 if (config.telegramToken) {
@@ -65,4 +68,6 @@ if (config.telegramToken) {
     telegram.start();
 }
 
-setInterval(() => console.log(`[${new Date().toLocaleString()}][MAIN] ----------------------`), 60000);
+setInterval(() => {
+    console.log(`[${new Date().toLocaleString()}][MAIN] ${Array.from(workers.keys()).join(', ')}\n`);
+}, 60000);

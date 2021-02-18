@@ -1,6 +1,6 @@
 import { CandleChartResult } from 'binance-api-node';
 import { BollingerBands } from 'technicalindicators';
-import { IOHLCV } from 'types';
+import { IOHLCV } from '../types';
 
 export const TrendAnalytics = (values: number[], highThreshold: number, lowThreshold: number) => {
     let last = values[values.length - 1];
