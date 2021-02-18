@@ -1,0 +1,48 @@
+{
+  "name": "binance-node-bot",
+  "version": "3.0.0",
+  "main": "index.js",
+  "author": {
+    "name": "Jose Morales",
+    "email": "jsmsalt@gmail.com"
+  },
+  "license": "MIT",
+  "private": "false",
+  "engines": {
+    "node": "12.16.1"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "**/*.test.ts",
+      "**/*.spec.ts",
+      ".git",
+      "node_modules"
+    ],
+    "watch": [
+      "src"
+    ],
+    "exec": "npm run build && cross-env NODE_ENV=development npm run start",
+    "ext": "ts, js"
+  },
+  "scripts": {
+    "clean": "npx rimraf build",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc --project ./",
+    "start": "node build/index.js",
+    "dev": "nodemon"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^8.2.0",
+    "@types/node": "^14.14.22",
+    "@types/telebot": "^1.2.2",
+    "cross-env": "^7.0.3",
+    "nodemon": "^2.0.7",
+    "typescript": "^4.1.3"
+  },
+  "dependencies": {
+    "binance-api-node": "^0.10.28",
+    "dotenv": "^8.2.0",
+    "technicalindicators": "^3.1.0",
+    "telebot": "^1.4.1"
+  }
+}
