@@ -50,8 +50,14 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
 
         let { close: closeHour } = CandleToObjectArray(candlesHour);
         let ema200 = EMA.calculate({ values: closeHour, period: 200 });
-        ema200 = ema200.slice(-10);
-        return (ema200[ema200.length - 1] * 100) / ema200[0] - 100 > 0.8;
+
+        let emaLast20 = ema200.slice(-20);
+        let emaLast10 = emaLast20.slice(-10);
+
+        let emaLast20Percent = (emaLast20[emaLast20.length - 1] * 100) / emaLast20[0] - 100;
+        let emaLast10Percent = (emaLast10[emaLast10.length - 1] * 100) / emaLast10[0] - 100;
+
+        return emaLast20Percent > 0.6 && emaLast10Percent > 0.2;
     };
 
     /*
