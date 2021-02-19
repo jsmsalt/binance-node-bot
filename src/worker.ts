@@ -90,6 +90,9 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             /*
              *   ASSET CANDLES
              */
+
+            Log('Analizando vela...');
+
             try {
                 candles = await client.candles({
                     symbol: `${asset}${base}`,
@@ -100,7 +103,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 if (openTime === lastOpenTime) return;
                 lastOpenTime = openTime;
             } catch (error) {
-                return;
+                return Log('Error al leer velas');
             }
 
             /*
@@ -111,7 +114,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 orders = orders.filter(x => x.type === 'MARKET');
                 if (orders.length > 0) return;
             } catch (error) {
-                return;
+                return Log('Error al leer ordenes');
             }
 
             /*
@@ -123,7 +126,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 let { balances: binanceBalances } = await client.accountInfo();
                 balances = binanceBalances;
             } catch (error) {
-                return;
+                return Log('Error al leer balances');
             }
 
             let { free: assetBalance, locked: assetLockedBalance } = balances.find(x => x.asset === asset);
@@ -141,9 +144,9 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 /*
                  *   BUY
                  */
-
-                if (signalPsar !== 'buy') return;
-                Log('COMPRA');
+                Log('Modo compra');
+                if (signalPsar !== 'buy') return Log('No hay señal de compra');
+                Log('Señal de compra');
                 if (Number.parseFloat(assetLockedBalance) >= minQty) return Log('Balance bloqueado');
                 if (Number.parseFloat(baseBalance) < amount)
                     return Log('El monto disponible no es suficiente para comprar');
@@ -176,9 +179,9 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 /*
                  *   SELL
                  */
-
-                if (signalPsar !== 'sell') return;
-                Log('VENTA');
+                Log('Modo venta');
+                if (signalPsar !== 'sell') return Log('No hay señal de venta');
+                Log('Señal de venta');
                 let lastBuyPrice = await GetLastBuyPrice();
                 if (!lastBuyPrice) return;
 
@@ -210,9 +213,8 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 }
             }
         } catch (error) {
-            Log(`Error inesperado`, true);
             console.log(JSON.stringify(error));
-            return;
+            return Log(`Error inesperado`, true);
         }
     }, config.workersInterval);
 })();
