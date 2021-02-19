@@ -86,6 +86,8 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
     Log('Worker iniciado...');
 
     setInterval(async () => {
+        let currentOpenTime: number = 0;
+
         try {
             /*
              *   ASSET CANDLES
@@ -98,8 +100,8 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                     limit: config.candlesLimit
                 });
                 let { openTime } = candles[candles.length - 1];
-                if (openTime === lastOpenTime) return;
-                lastOpenTime = openTime;
+                currentOpenTime = openTime;
+                if (currentOpenTime === lastOpenTime) return;
                 Log('Analizando velas');
             } catch (error) {
                 return Log('Error al leer velas');
@@ -107,7 +109,10 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
 
             let { low, high, close } = CandleToObjectArray(candles);
             let signalPsar = GetPsarSignal(low, high, close);
-            if (signalPsar === 'hold') return Log('No hay señales de compra ni venta');
+            if (signalPsar === 'hold') {
+                lastOpenTime = currentOpenTime;
+                return Log('No hay señales de compra ni venta');
+            }
 
             /*
              *   OPEN ORDERS
@@ -136,6 +141,8 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
 
             let { free: assetBalance, locked: assetLockedBalance } = balances.find(x => x.asset === asset);
             let { free: baseBalance } = balances.find(x => x.asset === base);
+
+            lastOpenTime = currentOpenTime;
 
             if (Number.parseFloat(assetBalance) < minQty) {
                 /*
