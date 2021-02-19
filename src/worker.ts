@@ -2,7 +2,7 @@ import Binance, { AssetBalance, CandleChartInterval, CandleChartResult } from 'b
 import { config } from './config';
 import { exit } from 'process';
 import { parentPort, workerData } from 'worker_threads';
-import { CandleToObjectArray, GetAvgBollingerBands, RoundStep } from './helpers/utils';
+import { CandleToObjectArray, RoundStep } from './helpers/utils';
 import { GetPsarSignal } from './helpers/signals';
 import { IAsset } from './types';
 import { EMA } from 'technicalindicators';
@@ -57,7 +57,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
         let emaLast20Percent = (emaLast20[emaLast20.length - 1] * 100) / emaLast20[0] - 100;
         let emaLast10Percent = (emaLast10[emaLast10.length - 1] * 100) / emaLast10[0] - 100;
 
-        return emaLast20Percent > 0.6 && emaLast10Percent > 0.2;
+        return emaLast20Percent > 0.8 && emaLast10Percent > 0.5;
     };
 
     /*
@@ -102,7 +102,6 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 let { openTime } = candles[candles.length - 1];
                 currentOpenTime = openTime;
                 if (currentOpenTime === lastOpenTime) return;
-                Log('Analizando velas');
             } catch (error) {
                 return Log('Error al leer velas');
             }
@@ -111,7 +110,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             let signalPsar = GetPsarSignal(low, high, close);
             if (signalPsar === 'hold') {
                 lastOpenTime = currentOpenTime;
-                return Log('No hay señales de compra ni venta');
+                return;
             }
 
             /*
@@ -121,7 +120,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 let orders = await client.openOrders({ symbol: `${asset}${base}` });
                 orders = orders.filter(x => x.type === 'MARKET');
                 if (orders.length > 0) return Log('Hay ordenes abiertas');
-                Log('No hay ordenes abiertas');
+                // Log('No hay ordenes abiertas');
             } catch (error) {
                 return Log('Error al leer ordenes');
             }
@@ -134,7 +133,6 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             try {
                 let { balances: binanceBalances } = await client.accountInfo();
                 balances = binanceBalances;
-                Log('Cargando balances');
             } catch (error) {
                 return Log('Error al leer balances');
             }
@@ -148,7 +146,6 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 /*
                  *   BUY
                  */
-                Log('Modo compra');
                 if (signalPsar !== 'buy') return Log('No hay señal de compra');
                 Log('Señal de compra');
                 if (Number.parseFloat(assetLockedBalance) >= minQty) return Log('Balance bloqueado');
@@ -183,7 +180,6 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 /*
                  *   SELL
                  */
-                Log('Modo venta');
                 if (signalPsar !== 'sell') return Log('No hay señal de venta');
                 Log('Señal de venta');
                 let lastBuyPrice = await GetLastBuyPrice();

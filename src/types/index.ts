@@ -19,8 +19,8 @@ export interface IConfig {
     stopLoss: number;
     minProfit: number;
     workersInterval: number;
-    bollingerBandsPeriods: number;
-    bollingerBandsMinAvg: number;
+    bollingerBandsPeriods?: number;
+    bollingerBandsMinAvg?: number;
     candlesLimit: number;
     candlesInterval:
         | '1m'
