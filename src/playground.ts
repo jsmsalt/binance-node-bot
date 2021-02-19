@@ -2,6 +2,7 @@ import Binance, { CandleChartInterval } from 'binance-api-node';
 import { CandleToObjectArray } from './helpers/utils';
 import { config } from './config';
 import { GetPsarSignal, GetRsiSignal, GetVwapSignal } from './helpers/signals';
+import { EMA } from 'technicalindicators';
 
 console.log('**** PLAYGROUND ****');
 
@@ -27,7 +28,9 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
 
         let closePeriod = close.slice(0, low.length - 100);
 
-        closePeriod.forEach((price, i) => {
+        for (let i = 0; i < closePeriod.length; i++) {
+            let price = closePeriod[i];
+
             let l = low.slice(i, i + 100);
             let h = high.slice(i, i + 100);
             let c = close.slice(i, i + 100);
@@ -40,6 +43,19 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
 
             if (mode === 'buy') {
                 if (signalPsar === 'buy') {
+                    //   let candlesHour = await client.candles({
+                    //       symbol: `${symbol.asset}${symbol.base}`,
+                    //       interval: CandleChartInterval.ONE_HOUR,
+                    //       limit: 250
+                    //   });
+
+                    //   let { close: closeHour } = CandleToObjectArray(candlesHour);
+
+                    //   let ema200 = EMA.calculate({values: closeHour,period: 200});
+
+                    //   ema200 = ema200.slice(-10);
+                    //   let percentaje = (ema200[ema200.length - 1] * 100) / ema200[0] - 100;
+
                     assetBalance = baseBalance / price;
                     baseBalance = 0;
                     mode = 'sell';
@@ -54,7 +70,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             }
 
             if (i === closePeriod.length - 1) lastPrice = price;
-        });
+        }
 
         let finalBalance = baseBalance > 0 ? baseBalance : assetBalance * lastPrice;
         console.log(`asset name: ${symbol.asset}, amount: ${finalBalance}`);

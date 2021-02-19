@@ -5,6 +5,7 @@ import { parentPort, workerData } from 'worker_threads';
 import { CandleToObjectArray, GetAvgBollingerBands, RoundStep } from './helpers/utils';
 import { GetPsarSignal } from './helpers/signals';
 import { IAsset } from './types';
+import { EMA } from 'technicalindicators';
 
 let { asset, base, amount } = workerData as IAsset;
 
@@ -38,6 +39,19 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
         } catch (error) {
             return null;
         }
+    };
+
+    const SymbolIsRising = async (): Promise<boolean> => {
+        let candlesHour = await client.candles({
+            symbol: `${asset}${base}`,
+            interval: CandleChartInterval.ONE_HOUR,
+            limit: 250
+        });
+
+        let { close: closeHour } = CandleToObjectArray(candlesHour);
+        let ema200 = EMA.calculate({ values: closeHour, period: 200 });
+        ema200 = ema200.slice(-10);
+        return (ema200[ema200.length - 1] * 100) / ema200[0] - 100 > 0.8;
     };
 
     /*
@@ -127,9 +141,12 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 if (Number.parseFloat(baseBalance) < amount)
                     return Log('El monto disponible no es suficiente para comprar');
 
-                let bbAverage = GetAvgBollingerBands(close, config.bollingerBandsPeriods);
-                if (bbAverage < config.bollingerBandsMinAvg)
-                    return Log(`El mercado no está estable para comprar (avg BB: ${bbAverage.toFixed(2)})`);
+                let isRising = await SymbolIsRising();
+                if (!isRising) return Log(`El mercado no está estable para comprar`);
+
+                // let bbAverage = GetAvgBollingerBands(close, config.bollingerBandsPeriods);
+                // if (bbAverage < config.bollingerBandsMinAvg)
+                //     return Log(`El mercado no está estable para comprar (avg BB: ${bbAverage.toFixed(2)})`);
 
                 let price = await GetPrice();
                 if (!price) return;
