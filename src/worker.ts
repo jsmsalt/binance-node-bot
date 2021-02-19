@@ -105,6 +105,10 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 return Log('Error al leer velas');
             }
 
+            let { low, high, close } = CandleToObjectArray(candles);
+            let signalPsar = GetPsarSignal(low, high, close);
+            if (signalPsar === 'hold') return Log('No hay señales de compra ni venta');
+
             /*
              *   OPEN ORDERS
              */
@@ -132,14 +136,6 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
 
             let { free: assetBalance, locked: assetLockedBalance } = balances.find(x => x.asset === asset);
             let { free: baseBalance } = balances.find(x => x.asset === base);
-
-            /*
-             *   STRATEGY DATA
-             */
-
-            let { low, high, close } = CandleToObjectArray(candles);
-
-            let signalPsar = GetPsarSignal(low, high, close);
 
             if (Number.parseFloat(assetBalance) < minQty) {
                 /*

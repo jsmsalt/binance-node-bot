@@ -6,10 +6,10 @@ export const GetPsarSignal = (low: number[], high: number[], close: number[]): '
     let max = 0.2;
     let input = { high, low, step, max };
     let psar = PSAR.calculate(input);
-    let [priceOne, priceTwo] = close.slice(-2);
-    let [one, two] = psar.slice(-2);
-    if (one > priceOne && two < priceTwo) return 'buy';
-    if (one < priceOne && two > priceTwo) return 'sell';
+    let psarBool = psar.map((x, i) => x > close[i]);
+    let [one, two] = psarBool.slice(-2);
+    if (one && !two) return 'buy';
+    if (!one && two) return 'sell';
     return 'hold';
 };
 
