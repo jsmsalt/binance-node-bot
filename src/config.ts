@@ -10,7 +10,7 @@ export const config: IConfig = {
     telegramToken: env.TELEGRAM_TOKEN ?? '',
     stopLoss: 5.0,
     minProfit: 0.1,
-    workersInterval: 5000,
+    workersInterval: 10000,
     // bollingerBandsMinAvg: 0.6,
     // bollingerBandsPeriods: 20,
     candlesInterval: '1m',

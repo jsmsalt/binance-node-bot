@@ -101,6 +101,9 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 });
                 let { openTime } = candles[candles.length - 1];
                 currentOpenTime = openTime;
+                console.log(currentOpenTime);
+                console.log(new Date().getTime());
+                console.log(new Date().getTime() - currentOpenTime);
                 if (currentOpenTime === lastOpenTime) return;
             } catch (error) {
                 return Log('Error al leer velas');
