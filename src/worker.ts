@@ -91,8 +91,6 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
              *   ASSET CANDLES
              */
 
-            Log('Analizando vela...');
-
             try {
                 candles = await client.candles({
                     symbol: `${asset}${base}`,
@@ -102,7 +100,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 let { openTime } = candles[candles.length - 1];
                 if (openTime === lastOpenTime) return;
                 lastOpenTime = openTime;
-                Log('Cargando velas');
+                Log('Analizando velas');
             } catch (error) {
                 return Log('Error al leer velas');
             }
