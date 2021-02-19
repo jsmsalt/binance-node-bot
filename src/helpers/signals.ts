@@ -1,16 +1,15 @@
 import { PSAR, RSI, VWAP } from 'technicalindicators';
 import { TrendAnalytics } from './utils';
 
-export const GetPsarSignal = (low: number[], high: number[]): 'sell' | 'buy' | 'hold' => {
+export const GetPsarSignal = (low: number[], high: number[], close: number[]): 'sell' | 'buy' | 'hold' => {
     let step = 0.02;
     let max = 0.2;
     let input = { high, low, step, max };
-    let psarResults = PSAR.calculate(input);
-    let [one, two, three] = psarResults.slice(-3);
-    if (one >= two && two >= three) return 'hold';
-    if (one <= two && two <= three) return 'hold';
-    if (one >= two && two < three) return 'buy';
-    if (one <= two && two > three) return 'sell';
+    let psar = PSAR.calculate(input);
+    let [priceOne, priceTwo] = close.slice(-2);
+    let [one, two] = psar.slice(-2);
+    if (one > priceOne && two < priceTwo) return 'buy';
+    if (one < priceOne && two > priceTwo) return 'sell';
     return 'hold';
 };
 
@@ -20,8 +19,8 @@ export const GetRsiSignal = (
     low: number = 30,
     period: number = 14
 ): 'sell' | 'buy' | 'hold' => {
-    let rsiResults = RSI.calculate({ values: close, period });
-    let rsiTrend = TrendAnalytics(rsiResults.slice(-3), high, low);
+    let rsi = RSI.calculate({ values: close, period });
+    let rsiTrend = TrendAnalytics(rsi.slice(-3), high, low);
     if (rsiTrend.isLow && !rsiTrend.isFalling) return 'buy';
     if (rsiTrend.isHigh && !rsiTrend.isRising) return 'sell';
     return 'hold';

@@ -35,18 +35,18 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             let v = volume.slice(i, i + 100);
 
             let signalRsi = GetRsiSignal(c);
-            let signalPsar = GetPsarSignal(l, h);
+            let signalPsar = GetPsarSignal(l, h, c);
             let signalVwap = GetVwapSignal(c, h, l, o, v);
 
             if (mode === 'buy') {
-                if (signalPsar === 'buy' || signalVwap === 'buy') {
+                if (signalPsar === 'buy') {
                     assetBalance = baseBalance / price;
                     baseBalance = 0;
                     mode = 'sell';
                     lastBuyPrice = price;
                 }
             } else {
-                if ((signalPsar === 'sell' || signalVwap === 'sell') && price > lastBuyPrice) {
+                if (signalPsar === 'sell' && price > lastBuyPrice) {
                     baseBalance = assetBalance * price;
                     assetBalance = 0;
                     mode = 'buy';

@@ -115,7 +115,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
 
             let { low, high, close } = CandleToObjectArray(candles);
 
-            let signalPsar = GetPsarSignal(low, high);
+            let signalPsar = GetPsarSignal(low, high, close);
 
             if (Number.parseFloat(assetBalance) < minQty) {
                 /*
