@@ -102,6 +102,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 let { openTime } = candles[candles.length - 1];
                 if (openTime === lastOpenTime) return;
                 lastOpenTime = openTime;
+                Log('Cargando velas');
             } catch (error) {
                 return Log('Error al leer velas');
             }
@@ -112,7 +113,8 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             try {
                 let orders = await client.openOrders({ symbol: `${asset}${base}` });
                 orders = orders.filter(x => x.type === 'MARKET');
-                if (orders.length > 0) return;
+                if (orders.length > 0) return Log('Hay ordenes abiertas');
+                Log('No hay ordenes abiertas');
             } catch (error) {
                 return Log('Error al leer ordenes');
             }
@@ -125,6 +127,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             try {
                 let { balances: binanceBalances } = await client.accountInfo();
                 balances = binanceBalances;
+                Log('Cargando balances');
             } catch (error) {
                 return Log('Error al leer balances');
             }
