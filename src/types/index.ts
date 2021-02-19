@@ -21,7 +21,7 @@ export interface IConfig {
     workersInterval: number;
     bollingerBandsPeriods: number;
     bollingerBandsMinAvg: number;
-    candlesLimit: 100;
+    candlesLimit: number;
     candlesInterval:
         | '1m'
         | '3m'

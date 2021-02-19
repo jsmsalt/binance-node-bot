@@ -1,9 +1,9 @@
 import Binance, { AssetBalance, CandleChartInterval, CandleChartResult } from 'binance-api-node';
+import { config } from './config';
 import { exit } from 'process';
 import { parentPort, workerData } from 'worker_threads';
 import { CandleToObjectArray, GetAvgBollingerBands, RoundStep } from './helpers/utils';
-import { GetPsarSignal, GetRsiSignal } from './helpers/signals';
-import { config } from './config';
+import { GetPsarSignal } from './helpers/signals';
 import { IAsset } from './types';
 
 let { asset, base, amount } = workerData as IAsset;
@@ -115,7 +115,6 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
 
             let { low, high, close } = CandleToObjectArray(candles);
 
-            let signalRsi = GetRsiSignal(close);
             let signalPsar = GetPsarSignal(low, high);
 
             if (Number.parseFloat(assetBalance) < minQty) {
@@ -123,7 +122,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                  *   BUY
                  */
 
-                if (signalRsi !== 'buy' && signalPsar !== 'buy') return;
+                if (signalPsar !== 'buy') return;
                 if (Number.parseFloat(assetLockedBalance) >= minQty) return Log('Balance bloqueado');
                 if (Number.parseFloat(baseBalance) < amount)
                     return Log('El monto disponible no es suficiente para comprar');
@@ -154,7 +153,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                  *   SELL
                  */
 
-                if (signalRsi !== 'sell' && signalPsar !== 'sell') return;
+                if (signalPsar !== 'sell') return;
 
                 let lastBuyPrice = await GetLastBuyPrice();
                 if (!lastBuyPrice) return;
