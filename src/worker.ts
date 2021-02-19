@@ -137,6 +137,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                  */
 
                 if (signalPsar !== 'buy') return;
+                Log('COMPRA');
                 if (Number.parseFloat(assetLockedBalance) >= minQty) return Log('Balance bloqueado');
                 if (Number.parseFloat(baseBalance) < amount)
                     return Log('El monto disponible no es suficiente para comprar');
@@ -171,7 +172,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                  */
 
                 if (signalPsar !== 'sell') return;
-
+                Log('VENTA');
                 let lastBuyPrice = await GetLastBuyPrice();
                 if (!lastBuyPrice) return;
 
