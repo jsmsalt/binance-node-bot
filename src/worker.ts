@@ -272,5 +272,5 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             console.log(JSON.stringify(error));
             return Log(`Error inesperado`, true);
         }
-    }, 2000);
+    }, 5000);
 })();
