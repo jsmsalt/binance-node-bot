@@ -9,6 +9,31 @@ import { EMA } from 'technicalindicators';
 
 let { asset, base, amount } = workerData as IAsset;
 
+const SECOND = 1000;
+const MINUTE = SECOND * 60;
+const HOUR = MINUTE * 60;
+const DAY = HOUR * 24;
+const WEEK = DAY * 7;
+const MONTH = DAY * 24;
+
+const periods = {
+    '1m': MINUTE,
+    '3m': MINUTE * 3,
+    '5m': MINUTE * 5,
+    '15m': MINUTE * 15,
+    '30m': MINUTE * 30,
+    '1h': HOUR,
+    '2h': HOUR * 2,
+    '4h': HOUR * 4,
+    '6h': HOUR * 6,
+    '8h': HOUR * 8,
+    '12h': HOUR * 12,
+    '1d': DAY,
+    '3d': DAY * 3,
+    '1w': WEEK,
+    '1M': MONTH
+};
+
 const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
 
 (async () => {
@@ -79,31 +104,6 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             | '1w'
             | '1M'
     ) => {
-        const SECOND = 1000;
-        const MINUTE = SECOND * 60;
-        const HOUR = MINUTE * 60;
-        const DAY = HOUR * 24;
-        const WEEK = DAY * 7;
-        const MONTH = DAY * 24;
-
-        const periods = {
-            '1m': MINUTE,
-            '3m': MINUTE * 3,
-            '5m': MINUTE * 5,
-            '15m': MINUTE * 15,
-            '30m': MINUTE * 30,
-            '1h': HOUR,
-            '2h': HOUR * 2,
-            '4h': HOUR * 4,
-            '6h': HOUR * 6,
-            '8h': HOUR * 8,
-            '12h': HOUR * 12,
-            '1d': DAY,
-            '3d': DAY * 3,
-            '1w': WEEK,
-            '1M': MONTH
-        };
-
         return time + periods[period] + SECOND;
     };
 
@@ -127,14 +127,34 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
     /*
      *   DEFAULT VALUES
      */
-    // let lastOpenTime: number = 0;
-    let nextCandleTime: number = 0;
+
+    let tempCandles: CandleChartResult[] = [];
+
+    try {
+        tempCandles = await client.candles({
+            symbol: `${asset}${base}`,
+            interval: config.candlesInterval as CandleChartInterval,
+            limit: 1
+        });
+    } catch (error) {
+        Log('Error al leer información de inicio', true);
+        exit(1);
+    }
+
+    let { openTime } = tempCandles[tempCandles.length - 1];
+    let periodTime: number = 1000;
+    let correctionTime: number = (GetNextCandleTime(openTime, config.candlesInterval) - new Date().getTime()) / 1000;
     let candles: CandleChartResult[] = [];
 
     Log('Worker iniciado...');
 
     setInterval(async () => {
-        if (nextCandleTime && new Date().getTime() < nextCandleTime) return;
+        if (correctionTime) {
+            correctionTime--;
+            return;
+        } else {
+            periodTime = periods[config.candlesInterval];
+        }
 
         // let currentOpenTime: number = 0;
 
@@ -150,8 +170,8 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                     limit: config.candlesLimit
                 });
 
-                let { openTime } = candles[candles.length - 1];
-                nextCandleTime = GetNextCandleTime(openTime, config.candlesInterval);
+                // let { openTime } = candles[candles.length - 1];
+                // nextCandleTime = GetNextCandleTime(openTime, config.candlesInterval);
                 Log('Velas cargadas');
                 // currentOpenTime = openTime;
                 // console.log(currentOpenTime);
@@ -272,5 +292,5 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             console.log(JSON.stringify(error));
             return Log(`Error inesperado`, true);
         }
-    }, 5000);
+    }, periodTime);
 })();
