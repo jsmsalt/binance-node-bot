@@ -18,7 +18,7 @@ export interface IConfig {
     telegramToken: string;
     stopLoss: number;
     minProfit: number;
-    workersInterval: number;
+    workersInterval?: number;
     bollingerBandsPeriods?: number;
     bollingerBandsMinAvg?: number;
     candlesLimit: number;
