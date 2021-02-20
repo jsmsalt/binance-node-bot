@@ -152,7 +152,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
 
                 let { openTime } = candles[candles.length - 1];
                 nextCandleTime = GetNextCandleTime(openTime, config.candlesInterval);
-
+                Log('Velas cargadas');
                 // currentOpenTime = openTime;
                 // console.log(currentOpenTime);
                 // console.log(new Date().getTime());
