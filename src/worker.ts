@@ -135,6 +135,8 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
 
     setInterval(async () => {
         if (nextCandleTime && nextCandleTime < new Date().getTime()) return;
+        console.log(nextCandleTime);
+        console.log(new Date().getTime());
 
         // let currentOpenTime: number = 0;
 
