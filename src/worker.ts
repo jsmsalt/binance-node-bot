@@ -60,6 +60,53 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
         return emaLast20Percent > 0.8 && emaLast10Percent > 0.5;
     };
 
+    const GetNextCandleTime = (
+        time: number,
+        period:
+            | '1m'
+            | '3m'
+            | '5m'
+            | '15m'
+            | '30m'
+            | '1h'
+            | '2h'
+            | '4h'
+            | '6h'
+            | '8h'
+            | '12h'
+            | '1d'
+            | '3d'
+            | '1w'
+            | '1M'
+    ) => {
+        const SECOND = 1000;
+        const MINUTE = SECOND * 60;
+        const HOUR = MINUTE * 60;
+        const DAY = HOUR * 24;
+        const WEEK = DAY * 7;
+        const MONTH = DAY * 24;
+
+        const periods = {
+            '1m': MINUTE,
+            '3m': MINUTE * 3,
+            '5m': MINUTE * 5,
+            '15m': MINUTE * 15,
+            '30m': MINUTE * 30,
+            '1h': HOUR,
+            '2h': HOUR * 2,
+            '4h': HOUR * 4,
+            '6h': HOUR * 6,
+            '8h': HOUR * 8,
+            '12h': HOUR * 12,
+            '1d': DAY,
+            '3d': DAY * 3,
+            '1w': WEEK,
+            '1M': MONTH
+        };
+
+        return time + periods[period] + SECOND;
+    };
+
     /*
      *   SYMBOL DATA
      */
@@ -80,13 +127,16 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
     /*
      *   DEFAULT VALUES
      */
-    let lastOpenTime: number = 0;
+    // let lastOpenTime: number = 0;
+    let nextCandleTime: number = 0;
     let candles: CandleChartResult[] = [];
 
     Log('Worker iniciado...');
 
     setInterval(async () => {
-        let currentOpenTime: number = 0;
+        if (nextCandleTime && nextCandleTime < new Date().getTime()) return;
+
+        // let currentOpenTime: number = 0;
 
         try {
             /*
@@ -99,12 +149,15 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                     interval: config.candlesInterval as CandleChartInterval,
                     limit: config.candlesLimit
                 });
+
                 let { openTime } = candles[candles.length - 1];
-                currentOpenTime = openTime;
-                console.log(currentOpenTime);
-                console.log(new Date().getTime());
-                console.log(new Date().getTime() - currentOpenTime);
-                if (currentOpenTime === lastOpenTime) return;
+                nextCandleTime = GetNextCandleTime(openTime, config.candlesInterval);
+
+                // currentOpenTime = openTime;
+                // console.log(currentOpenTime);
+                // console.log(new Date().getTime());
+                // console.log(new Date().getTime() - currentOpenTime);
+                // if (currentOpenTime === lastOpenTime) return;
             } catch (error) {
                 return Log('Error al leer velas');
             }
@@ -112,7 +165,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             let { low, high, close } = CandleToObjectArray(candles);
             let signalPsar = GetPsarSignal(low, high, close);
             if (signalPsar === 'hold') {
-                lastOpenTime = currentOpenTime;
+                // lastOpenTime = currentOpenTime;
                 return;
             }
 
@@ -143,7 +196,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             let { free: assetBalance, locked: assetLockedBalance } = balances.find(x => x.asset === asset);
             let { free: baseBalance } = balances.find(x => x.asset === base);
 
-            lastOpenTime = currentOpenTime;
+            // lastOpenTime = currentOpenTime;
 
             if (Number.parseFloat(assetBalance) < minQty) {
                 /*
@@ -219,5 +272,5 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             console.log(JSON.stringify(error));
             return Log(`Error inesperado`, true);
         }
-    }, config.workersInterval);
+    }, 2000);
 })();
