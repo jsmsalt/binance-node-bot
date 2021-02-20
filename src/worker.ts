@@ -143,7 +143,12 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
 
     let { openTime } = tempCandles[tempCandles.length - 1];
     let periodTime: number = 1000;
-    let correctionTime: number = (GetNextCandleTime(openTime, config.candlesInterval) - new Date().getTime()) / 1000;
+    let correctionTime: number = Math.ceil(
+        (GetNextCandleTime(openTime, config.candlesInterval) - new Date().getTime()) / 1000
+    );
+
+    console.log(`open: ${openTime}, current: ${new Date().getTime()}, correction: ${correctionTime}`);
+
     let candles: CandleChartResult[] = [];
 
     Log('Worker iniciado...');
