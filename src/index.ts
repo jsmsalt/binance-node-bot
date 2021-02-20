@@ -68,6 +68,4 @@ if (config.telegramToken) {
     telegram.start();
 }
 
-setInterval(() => {
-    console.log(`[${new Date().toLocaleString()}][MAIN] ${Array.from(workers.keys()).join(', ')}\n`);
-}, 1000 * 60 * 15);
+setInterval(() => {}, 1000 * 60 * 15);

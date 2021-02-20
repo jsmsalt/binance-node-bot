@@ -85,28 +85,6 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
         return emaLast20Percent > 0.8 && emaLast10Percent > 0.5;
     };
 
-    const GetNextCandleTime = (
-        time: number,
-        period:
-            | '1m'
-            | '3m'
-            | '5m'
-            | '15m'
-            | '30m'
-            | '1h'
-            | '2h'
-            | '4h'
-            | '6h'
-            | '8h'
-            | '12h'
-            | '1d'
-            | '3d'
-            | '1w'
-            | '1M'
-    ) => {
-        return time + periods[period];
-    };
-
     /*
      *   SYMBOL DATA
      */
@@ -120,7 +98,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
         tickSize = qty['stepSize'];
         minQty = Number.parseFloat(qty['minQty']);
     } catch (error) {
-        Log(`Error al obtener información`, true);
+        Log(`Error al leer información de inicio`, true);
         exit(1);
     }
 
@@ -142,7 +120,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
     }
 
     let { openTime } = tempCandles[tempCandles.length - 1];
-    let nextCandleTime: number = GetNextCandleTime(openTime, config.candlesInterval);
+    let nextCandleTime: number = openTime + periods[config.candlesInterval];
     let candles: CandleChartResult[] = [];
 
     Log('Worker iniciado...');
@@ -150,7 +128,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
     setInterval(async () => {
         let currentTime = new Date().getTime();
         if (currentTime < nextCandleTime) return;
-        nextCandleTime = GetNextCandleTime(nextCandleTime, config.candlesInterval);
+        nextCandleTime = nextCandleTime + periods[config.candlesInterval];
 
         try {
             /*
@@ -163,9 +141,6 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                     interval: config.candlesInterval as CandleChartInterval,
                     limit: config.candlesLimit
                 });
-
-                // let { openTime } = candles[candles.length - 1];
-                Log('Velas cargadas');
             } catch (error) {
                 return Log('Error al leer velas');
             }
@@ -204,7 +179,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 /*
                  *   BUY
                  */
-                if (signalPsar !== 'buy') return Log('No hay señal de compra');
+                if (signalPsar !== 'buy') return;
                 Log('Señal de compra');
                 if (Number.parseFloat(assetLockedBalance) >= minQty) return Log('Balance bloqueado');
                 if (Number.parseFloat(baseBalance) < amount)
@@ -212,10 +187,6 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
 
                 let isRising = await SymbolIsRising();
                 if (!isRising) return Log(`El mercado no está estable para comprar`);
-
-                // let bbAverage = GetAvgBollingerBands(close, config.bollingerBandsPeriods);
-                // if (bbAverage < config.bollingerBandsMinAvg)
-                //     return Log(`El mercado no está estable para comprar (avg BB: ${bbAverage.toFixed(2)})`);
 
                 let price = await GetPrice();
                 if (!price) return;
@@ -238,7 +209,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 /*
                  *   SELL
                  */
-                if (signalPsar !== 'sell') return Log('No hay señal de venta');
+                if (signalPsar !== 'sell') return;
                 Log('Señal de venta');
                 let lastBuyPrice = await GetLastBuyPrice();
                 if (!lastBuyPrice) return;
