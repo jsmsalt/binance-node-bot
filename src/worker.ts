@@ -104,7 +104,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             | '1w'
             | '1M'
     ) => {
-        return time + periods[period] + SECOND;
+        return time + periods[period];
     };
 
     /*
@@ -142,26 +142,15 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
     }
 
     let { openTime } = tempCandles[tempCandles.length - 1];
-    let periodTime: number = 1000;
-    let correctionTime: number = Math.ceil(
-        (GetNextCandleTime(openTime, config.candlesInterval) - new Date().getTime()) / 1000
-    );
-
-    console.log(`open: ${openTime}, current: ${new Date().getTime()}, correction: ${correctionTime}`);
-
+    let nextCandleTime: number = GetNextCandleTime(openTime, config.candlesInterval);
     let candles: CandleChartResult[] = [];
 
     Log('Worker iniciado...');
 
     setInterval(async () => {
-        if (correctionTime) {
-            correctionTime--;
-            return;
-        } else {
-            periodTime = periods[config.candlesInterval];
-        }
-
-        // let currentOpenTime: number = 0;
+        let currentTime = new Date().getTime();
+        if (currentTime < nextCandleTime) return;
+        nextCandleTime = GetNextCandleTime(nextCandleTime, config.candlesInterval);
 
         try {
             /*
@@ -176,23 +165,14 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 });
 
                 // let { openTime } = candles[candles.length - 1];
-                // nextCandleTime = GetNextCandleTime(openTime, config.candlesInterval);
                 Log('Velas cargadas');
-                // currentOpenTime = openTime;
-                // console.log(currentOpenTime);
-                // console.log(new Date().getTime());
-                // console.log(new Date().getTime() - currentOpenTime);
-                // if (currentOpenTime === lastOpenTime) return;
             } catch (error) {
                 return Log('Error al leer velas');
             }
 
             let { low, high, close } = CandleToObjectArray(candles);
             let signalPsar = GetPsarSignal(low, high, close);
-            if (signalPsar === 'hold') {
-                // lastOpenTime = currentOpenTime;
-                return;
-            }
+            if (signalPsar === 'hold') return;
 
             /*
              *   OPEN ORDERS
@@ -201,7 +181,6 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 let orders = await client.openOrders({ symbol: `${asset}${base}` });
                 orders = orders.filter(x => x.type === 'MARKET');
                 if (orders.length > 0) return Log('Hay ordenes abiertas');
-                // Log('No hay ordenes abiertas');
             } catch (error) {
                 return Log('Error al leer ordenes');
             }
@@ -220,8 +199,6 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
 
             let { free: assetBalance, locked: assetLockedBalance } = balances.find(x => x.asset === asset);
             let { free: baseBalance } = balances.find(x => x.asset === base);
-
-            // lastOpenTime = currentOpenTime;
 
             if (Number.parseFloat(assetBalance) < minQty) {
                 /*
@@ -297,5 +274,5 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             console.log(JSON.stringify(error));
             return Log(`Error inesperado`, true);
         }
-    }, periodTime);
+    }, 1000);
 })();
