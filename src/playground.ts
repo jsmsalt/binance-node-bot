@@ -33,7 +33,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             console.log(symbol.asset);
             console.log(`20: ${emaLastLargePercent}, 10: ${emaLastMediumPercent}, 5: ${emaLastSmallPercent}`);
 
-            return emaLastLargePercent > 1.5 && emaLastMediumPercent > 1 && emaLastSmallPercent > 0.5;
+            return emaLastLargePercent > 2.5 && emaLastMediumPercent > 1.5 && emaLastSmallPercent > 0.75;
         };
 
         console.log(await SymbolIsRising());
