@@ -84,7 +84,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
         let emaLastMediumPercent = (emaLastMedium[emaLastMedium.length - 1] * 100) / emaLastMedium[0] - 100;
         let emaLastSmallPercent = (emaLastSmall[emaLastSmall.length - 1] * 100) / emaLastSmall[0] - 100;
 
-        return emaLastLargePercent > 1.2 && emaLastMediumPercent > 0.8 && emaLastSmallPercent > 0.3;
+        return emaLastLargePercent > 1.5 && emaLastMediumPercent > 1 && emaLastSmallPercent > 0.5;
     };
 
     /*
