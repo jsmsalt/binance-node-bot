@@ -84,7 +84,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
         let emaLastMediumPercent = (emaLastMedium[emaLastMedium.length - 1] * 100) / emaLastMedium[0] - 100;
         let emaLastSmallPercent = (emaLastSmall[emaLastSmall.length - 1] * 100) / emaLastSmall[0] - 100;
 
-        return emaLastLargePercent > 1 && emaLastMediumPercent > 0.65 && emaLastSmallPercent > 0.25;
+        return emaLastLargePercent > 1.2 && emaLastMediumPercent > 0.8 && emaLastSmallPercent > 0.3;
     };
 
     /*
@@ -124,6 +124,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
     let { openTime } = tempCandles[tempCandles.length - 1];
     let nextCandleTime: number = openTime + periods[config.candlesInterval];
     let candles: CandleChartResult[] = [];
+    let lastBuy: number = 0;
 
     Log('Worker iniciado...');
 
@@ -181,6 +182,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
                 /*
                  *   BUY
                  */
+                if (currentTime - lastBuy <= periods['30m']) return;
                 if (signalPsar !== 'buy') return;
                 Log('Señal de compra');
                 if (Number.parseFloat(assetLockedBalance) >= minQty) return Log('Balance bloqueado');
@@ -203,6 +205,7 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
 
                 try {
                     await client.order({ symbol: `${asset}${base}`, type: 'MARKET', side: 'BUY', quantity: qty });
+                    lastBuy = currentTime;
                     Log(`Compré en ${price}`, true);
                 } catch (error) {
                     return Log('Error al comprar');
