@@ -29,6 +29,7 @@ export const config: IConfig = {
         { asset: 'DOT', base: 'USDT', amount: 40 },
         { asset: 'ENJ', base: 'USDT', amount: 40 },
         { asset: 'EOS', base: 'USDT', amount: 40 },
+        { asset: 'ETH', base: 'USDT', amount: 40 },
         { asset: 'FIL', base: 'USDT', amount: 40 },
         { asset: 'GRT', base: 'USDT', amount: 40 },
         { asset: 'ICX', base: 'USDT', amount: 40 },
