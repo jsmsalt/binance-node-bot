@@ -8,7 +8,7 @@ export const config: IConfig = {
     apiKey: env.BINANCE_KEY ?? '',
     apiSecret: env.BINANCE_SECRET ?? '',
     telegramToken: env.TELEGRAM_TOKEN ?? '',
-    stopLoss: 5,
+    stopLoss: 4,
     minProfit: 0.05,
     // workersInterval: 1000,
     // bollingerBandsMinAvg: 0.6,

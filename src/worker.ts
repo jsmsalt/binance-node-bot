@@ -88,7 +88,8 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
         let emaSPer = (emaS[emaS.length - 1] * 100) / emaS[0] - 100;
         let emaXSPer = (emaXS[emaXS.length - 1] * 100) / emaXS[0] - 100;
 
-        return emaXLPer > 4 && emaLGPer > 2 && emaMPer > 1 && emaSPer > 0.5 && emaXSPer > 0.1;
+        // return emaXLPer > 4 && emaLGPer > 2 && emaMPer > 1 && emaSPer > 0.5 && emaXSPer > 0.1;
+        return emaXLPer > 2.2 && emaLGPer > 1.2 && emaMPer > 0.8 && emaSPer > 0.3 && emaXSPer > 0.1;
     };
 
     /*

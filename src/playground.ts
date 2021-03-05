@@ -37,7 +37,8 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             console.log(symbol.asset);
             console.log(`xl: ${emaXLPer}, lg: ${emaLGPer}, m: ${emaMPer}, s: ${emaSPer}, xs: ${emaXSPer}`);
 
-            return emaXLPer > 4 && emaLGPer > 2 && emaMPer > 1 && emaSPer > 0.5 && emaXSPer > 0.1;
+            // return emaXLPer > 4 && emaLGPer > 2 && emaMPer > 1 && emaSPer > 0.5 && emaXSPer > 0.1;
+            return emaXLPer > 2.2 && emaLGPer > 1.2 && emaMPer > 0.8 && emaSPer > 0.3 && emaXSPer > 0.1;
         };
 
         console.log(await SymbolIsRising());
