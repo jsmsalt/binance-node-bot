@@ -22,18 +22,22 @@ const client = Binance({ apiKey: config.apiKey, apiSecret: config.apiSecret });
             let { close: closeHour } = CandleToObjectArray(candlesHour);
             let ema200 = EMA.calculate({ values: closeHour, period: 200 });
 
-            let emaLastLarge = ema200.slice(-12);
-            let emaLastMedium = emaLastLarge.slice(-8);
-            let emaLastSmall = emaLastMedium.slice(-4);
+            let emaXL = ema200.slice(-24);
+            let emaLG = emaXL.slice(-12);
+            let emaM = emaLG.slice(-8);
+            let emaS = emaM.slice(-4);
+            let emaXS = emaS.slice(-2);
 
-            let emaLastLargePercent = (emaLastLarge[emaLastLarge.length - 1] * 100) / emaLastLarge[0] - 100;
-            let emaLastMediumPercent = (emaLastMedium[emaLastMedium.length - 1] * 100) / emaLastMedium[0] - 100;
-            let emaLastSmallPercent = (emaLastSmall[emaLastSmall.length - 1] * 100) / emaLastSmall[0] - 100;
+            let emaXLPer = (emaXL[emaXL.length - 1] * 100) / emaXL[0] - 100;
+            let emaLGPer = (emaLG[emaLG.length - 1] * 100) / emaLG[0] - 100;
+            let emaMPer = (emaM[emaM.length - 1] * 100) / emaM[0] - 100;
+            let emaSPer = (emaS[emaS.length - 1] * 100) / emaS[0] - 100;
+            let emaXSPer = (emaXS[emaXS.length - 1] * 100) / emaXS[0] - 100;
 
             console.log(symbol.asset);
-            console.log(`20: ${emaLastLargePercent}, 10: ${emaLastMediumPercent}, 5: ${emaLastSmallPercent}`);
+            console.log(`xl: ${emaXLPer}, lg: ${emaLGPer}, m: ${emaMPer}, s: ${emaSPer}, xs: ${emaXSPer}`);
 
-            return emaLastLargePercent > 1.5 && emaLastMediumPercent > 1 && emaLastSmallPercent > 0.45;
+            return emaXLPer > 4 && emaLGPer > 2 && emaMPer > 1 && emaSPer > 0.5 && emaXSPer > 0.1;
         };
 
         console.log(await SymbolIsRising());
